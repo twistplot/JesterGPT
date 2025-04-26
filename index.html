@@ -130,9 +130,9 @@
       box-shadow: 0 0 10px #ff1a1a;
     }
 
+    /* SPIN BUTTON */
     .spin-button {
       display: inline-block;
-      margin: 20px auto;
       padding: 15px 30px;
       background-color: #ff4d4d;
       color: white;
@@ -144,6 +144,7 @@
       transition: 0.3s;
       cursor: pointer;
       border: none;
+      margin: 10px;
     }
 
     .spin-button:hover {
@@ -155,6 +156,35 @@
       background-color: #ccc;
       box-shadow: 0 5px #999;
       cursor: not-allowed;
+    }
+
+    /* PUMP.FUN BUTTON */
+    .pumpfun-button {
+      display: inline-block;
+      padding: 15px 30px;
+      background: linear-gradient(45deg, #8a2be2, #4b0082);
+      color: white;
+      font-size: 1.5em;
+      font-weight: bold;
+      border-radius: 15px;
+      text-decoration: none;
+      box-shadow: 0 5px #5a1a9a;
+      transition: 0.3s;
+      cursor: pointer;
+      border: none;
+      margin: 10px;
+    }
+
+    .pumpfun-button:hover {
+      background: linear-gradient(45deg, #9b30ff, #5d00a8);
+      box-shadow: 0 3px #4a148c;
+      transform: translateY(2px);
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     footer {
@@ -213,7 +243,10 @@
     <div class="bet-option" data-bet="19-36">19-36</div>
   </div>
 
-  <button class="spin-button" id="spinBtn">SPIN THE WHEEL!</button>
+  <div class="button-container">
+    <button class="spin-button" id="spinBtn">SPIN THE WHEEL!</button>
+    <a href="https://www.pump.fun" target="_blank" class="pumpfun-button">🚀 PUMP.FUN</a>
+  </div>
 
   <footer>
     Powered by Chaos, Laughter, and JesterGPT!
