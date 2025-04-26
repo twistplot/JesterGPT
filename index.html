@@ -49,30 +49,90 @@
       position: relative;
     }
 
-    .roulette {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    .roulette-container {
+      position: relative;
       width: 300px;
       height: 300px;
-      background: conic-gradient(
-        #ff4d4d 0deg 60deg,
-        #ffb347 60deg 120deg,
-        #7ec8e3 120deg 180deg,
-        #ff7eb9 180deg 240deg,
-        #e0bbff 240deg 300deg,
-        #ffd700 300deg 360deg
-      );
+      margin: 20px auto;
+    }
+
+    .roulette-wheel {
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
-      transition: transform 3s ease-out;
-      opacity: 0.5;
-      z-index: 1;
+      position: relative;
+      overflow: hidden;
+      border: 5px solid #333;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+      background: #0a5c36;
+    }
+
+    .roulette-segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      transform-origin: bottom right;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      text-shadow: 1px 1px 1px #000;
+    }
+
+    .roulette-pointer {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-top: 30px solid red;
+      z-index: 10;
+    }
+
+    .result-display {
+      margin: 20px auto;
+      padding: 15px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 10px;
+      font-size: 1.5em;
+      width: 80%;
+      max-width: 300px;
+    }
+
+    .betting-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px auto;
+      max-width: 500px;
+    }
+
+    .bet-option {
+      padding: 10px 15px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .bet-option:hover {
+      background: rgba(255,255,255,0.4);
+    }
+
+    .bet-option.selected {
+      background: #ff4d4d;
+      box-shadow: 0 0 10px #ff1a1a;
     }
 
     .spin-button {
       display: inline-block;
-      margin-top: 40px;
+      margin: 20px auto;
       padding: 15px 30px;
       background-color: #ff4d4d;
       color: white;
@@ -82,6 +142,8 @@
       text-decoration: none;
       box-shadow: 0 5px #b30000;
       transition: 0.3s;
+      cursor: pointer;
+      border: none;
     }
 
     .spin-button:hover {
@@ -89,45 +151,244 @@
       box-shadow: 0 3px #800000;
     }
 
+    .spin-button:disabled {
+      background-color: #ccc;
+      box-shadow: 0 5px #999;
+      cursor: not-allowed;
+    }
+
     footer {
       margin-top: 40px;
       font-size: 0.9em;
       opacity: 0.7;
     }
+
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0;
+      z-index: 100;
+      animation: confetti 3s ease-out;
+    }
+
+    @keyframes confetti {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <h1>Welcome to JesterGPT!</h1>
-  <p>Laugh, Spin, and Let the AI Clown Pick Your Fate!</p>
+  <h1>Welcome to JesterGPT Roulette!</h1>
+  <p>Place your bets and spin the wheel of fortune!</p>
 
   <div class="container">
-    <div class="roulette" id="roulette"></div>
     <img src="A_2D_digital_illustration_in_cartoon_style_feature.png" alt="JesterGPT Image" class="jester-image">
   </div>
 
-  <br>
+  <div class="roulette-container">
+    <div class="roulette-pointer"></div>
+    <div class="roulette-wheel" id="rouletteWheel"></div>
+  </div>
 
-  <a href="javascript:void(0);" class="spin-button" id="spinBtn">SPIN THE WHEEL!</a>
+  <div class="result-display" id="resultDisplay">
+    Place your bet and spin!
+  </div>
+
+  <div class="betting-options">
+    <div class="bet-option" data-bet="red">🔴 Red</div>
+    <div class="bet-option" data-bet="black">⚫ Black</div>
+    <div class="bet-option" data-bet="green">🟢 Green (0)</div>
+    <div class="bet-option" data-bet="odd">Odd</div>
+    <div class="bet-option" data-bet="even">Even</div>
+    <div class="bet-option" data-bet="1-18">1-18</div>
+    <div class="bet-option" data-bet="19-36">19-36</div>
+  </div>
+
+  <button class="spin-button" id="spinBtn">SPIN THE WHEEL!</button>
 
   <footer>
     Powered by Chaos, Laughter, and JesterGPT!
   </footer>
 
-  <script>
-    // Get the roulette element and the spin button
-    const roulette = document.getElementById('roulette');
-    const spinBtn = document.getElementById('spinBtn');
+  <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1930.mp3" preload="auto"></audio>
+  <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+  <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.mp3" preload="auto"></audio>
 
-    // Function to generate a random rotation angle for the roulette
-    function spinRoulette() {
-      // Generate a random angle between 0 and 360
-      const randomAngle = Math.floor(Math.random() * 360) + 720; // Ensure it spins at least twice
-      roulette.style.transform = `translate(-50%, -50%) rotate(${randomAngle}deg)`;
+  <script>
+    // Game variables
+    let currentBet = null;
+    let isSpinning = false;
+    const numbers = [
+      { number: 0, color: 'green' },
+      { number: 32, color: 'red' },
+      { number: 15, color: 'black' },
+      { number: 19, color: 'red' },
+      { number: 4, color: 'black' },
+      { number: 21, color: 'red' },
+      { number: 2, color: 'black' },
+      { number: 25, color: 'red' },
+      { number: 17, color: 'black' },
+      { number: 34, color: 'red' },
+      { number: 6, color: 'black' },
+      { number: 27, color: 'red' },
+      { number: 13, color: 'black' },
+      { number: 36, color: 'red' },
+      { number: 11, color: 'black' },
+      { number: 30, color: 'red' },
+      { number: 8, color: 'black' },
+      { number: 23, color: 'red' },
+      { number: 10, color: 'black' },
+      { number: 5, color: 'red' },
+      { number: 24, color: 'black' },
+      { number: 16, color: 'red' },
+      { number: 33, color: 'black' },
+      { number: 1, color: 'red' },
+      { number: 20, color: 'black' },
+      { number: 14, color: 'red' },
+      { number: 31, color: 'black' },
+      { number: 9, color: 'red' },
+      { number: 22, color: 'black' },
+      { number: 18, color: 'red' },
+      { number: 29, color: 'black' },
+      { number: 7, color: 'red' },
+      { number: 28, color: 'black' },
+      { number: 12, color: 'red' },
+      { number: 35, color: 'black' },
+      { number: 3, color: 'red' },
+      { number: 26, color: 'black' }
+    ];
+
+    // DOM elements
+    const rouletteWheel = document.getElementById('rouletteWheel');
+    const spinBtn = document.getElementById('spinBtn');
+    const resultDisplay = document.getElementById('resultDisplay');
+    const betOptions = document.querySelectorAll('.bet-option');
+    const spinSound = document.getElementById('spinSound');
+    const winSound = document.getElementById('winSound');
+    const loseSound = document.getElementById('loseSound');
+
+    // Initialize the roulette wheel
+    function initRouletteWheel() {
+      numbers.forEach((num, index) => {
+        const segment = document.createElement('div');
+        segment.className = 'roulette-segment';
+        segment.style.transform = `rotate(${index * (360 / numbers.length)}deg)`;
+        segment.style.backgroundColor = num.color === 'red' ? '#d22b2b' : 
+                                       num.color === 'black' ? '#000' : '#0a5c36';
+        segment.innerHTML = `<span style="transform: rotate(${90 + (360 / numbers.length / 2)}deg)">${num.number}</span>`;
+        rouletteWheel.appendChild(segment);
+      });
     }
 
-    // Add an event listener to the spin button to trigger the roulette spin
-    spinBtn.addEventListener('click', spinRoulette);
+    // Handle bet selection
+    betOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        if (isSpinning) return;
+        
+        betOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        currentBet = option.dataset.bet;
+        resultDisplay.textContent = `Bet placed on: ${option.textContent}`;
+      });
+    });
+
+    // Spin the wheel
+    spinBtn.addEventListener('click', () => {
+      if (isSpinning || !currentBet) return;
+      
+      isSpinning = true;
+      spinBtn.disabled = true;
+      resultDisplay.textContent = "Spinning...";
+      
+      // Play spin sound
+      spinSound.currentTime = 0;
+      spinSound.play();
+      
+      // Random rotation (at least 3 full rotations)
+      const spinDegrees = Math.floor(Math.random() * 360) + 1080;
+      rouletteWheel.style.transform = `rotate(${-spinDegrees}deg)`;
+      
+      // Determine result after spinning
+      setTimeout(() => {
+        const segmentDegree = 360 / numbers.length;
+        const normalizedRotation = spinDegrees % 360;
+        const winningIndex = Math.floor(normalizedRotation / segmentDegree);
+        const winningNumber = numbers[winningIndex];
+        
+        displayResult(winningNumber);
+        isSpinning = false;
+        spinBtn.disabled = false;
+      }, 5000);
+    });
+
+    // Display result and check win
+    function displayResult(winningNumber) {
+      const isWin = checkWin(winningNumber);
+      const winText = isWin ? "You won! 🎉" : "You lost! 😢";
+      
+      resultDisplay.innerHTML = `
+        <div>Landed on: <strong>${winningNumber.number} ${winningNumber.color.toUpperCase()}</strong></div>
+        <div>${winText}</div>
+      `;
+      
+      // Play sound and show celebration if won
+      if (isWin) {
+        winSound.currentTime = 0;
+        winSound.play();
+        createConfetti();
+      } else {
+        loseSound.currentTime = 0;
+        loseSound.play();
+      }
+    }
+
+    // Check if the bet wins
+    function checkWin(winningNumber) {
+      const num = winningNumber.number;
+      const color = winningNumber.color;
+      
+      switch(currentBet) {
+        case 'red': return color === 'red';
+        case 'black': return color === 'black';
+        case 'green': return num === 0;
+        case 'odd': return num % 2 === 1 && num !== 0;
+        case 'even': return num % 2 === 0 && num !== 0;
+        case '1-18': return num >= 1 && num <= 18;
+        case '19-36': return num >= 19 && num <= 36;
+        default: return false;
+      }
+    }
+
+    // Create confetti effect
+    function createConfetti() {
+      const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+      
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+        document.body.appendChild(confetti);
+        
+        // Remove confetti after animation
+        setTimeout(() => {
+          confetti.remove();
+        }, 3000);
+      }
+    }
+
+    // Initialize the game
+    initRouletteWheel();
   </script>
 
 </body>
