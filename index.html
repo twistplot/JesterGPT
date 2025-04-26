@@ -65,17 +65,12 @@
         #ffd700 300deg 360deg
       );
       border-radius: 50%;
-      animation: spinRoulette 8s linear infinite;
+      transition: transform 3s ease-out;
       opacity: 0.5;
       z-index: 1;
     }
 
-    @keyframes spinRoulette {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    a.button {
+    .spin-button {
       display: inline-block;
       margin-top: 40px;
       padding: 15px 30px;
@@ -89,7 +84,7 @@
       transition: 0.3s;
     }
 
-    a.button:hover {
+    .spin-button:hover {
       background-color: #ff1a1a;
       box-shadow: 0 3px #800000;
     }
@@ -107,17 +102,33 @@
   <p>Laugh, Spin, and Let the AI Clown Pick Your Fate!</p>
 
   <div class="container">
-    <div class="roulette"></div>
+    <div class="roulette" id="roulette"></div>
     <img src="A_2D_digital_illustration_in_cartoon_style_feature.png" alt="JesterGPT Image" class="jester-image">
   </div>
 
   <br>
 
-  <a href="https://pump.fun/" target="_blank" class="button">SPIN THE CIRCUS!</a>
+  <a href="javascript:void(0);" class="spin-button" id="spinBtn">SPIN THE WHEEL!</a>
 
   <footer>
     Powered by Chaos, Laughter, and JesterGPT!
   </footer>
+
+  <script>
+    // Get the roulette element and the spin button
+    const roulette = document.getElementById('roulette');
+    const spinBtn = document.getElementById('spinBtn');
+
+    // Function to generate a random rotation angle for the roulette
+    function spinRoulette() {
+      // Generate a random angle between 0 and 360
+      const randomAngle = Math.floor(Math.random() * 360) + 720; // Ensure it spins at least twice
+      roulette.style.transform = `translate(-50%, -50%) rotate(${randomAngle}deg)`;
+    }
+
+    // Add an event listener to the spin button to trigger the roulette spin
+    spinBtn.addEventListener('click', spinRoulette);
+  </script>
 
 </body>
 </html>
